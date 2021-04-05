@@ -15,3 +15,11 @@ You can customize this build by changing the files in the ```conf``` directory.
 ```conf/owasp``` contains our owasp core rule set config
 
 This image also includes generic error and maintenance pages that you can use out of the box or customize to match the design of your site.
+
+## Multi-arch build
+
+```
+export REPOSITORY=asksven/docker-alpine-nginx-modsec
+export VERSION=42
+make
+```
