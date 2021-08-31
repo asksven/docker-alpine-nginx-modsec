@@ -1,10 +1,14 @@
-ARG NGINX_VER=1.19.7
+ARG NGINX_VER=1.21.1
 
 FROM nginx:${NGINX_VER}-alpine as build_modsecurity
 
-ARG GEO_DB_RELEASE=2021-03
+ARG GEO_DB_RELEASE=2021-08
 ARG MODSEC_BRANCH=v3.0.4
 ARG OWASP_BRANCH=v3.3/master
+
+ARG CLAMD_SERVER=127.0.0.1
+ARG CLAMD_PORT=3310
+ARG CLAMD_DEBUG_LOG=off
 
 WORKDIR /opt
 
@@ -33,6 +37,7 @@ RUN echo "Installing Dependencies" && \
     pcre-dev \
     yajl-dev \
     zlib-dev
+
 
 # Clone and compile modsecurity. Binary will be located in /usr/local/modsecurity
 RUN echo "Installing ModSec Library" && \
@@ -88,6 +93,9 @@ COPY errors /usr/share/nginx/errors
 COPY conf/nginx/ /etc/nginx/
 COPY conf/modsec/ /etc/nginx/modsec/
 COPY conf/owasp/ /usr/local/owasp-modsecurity-crs/
+COPY clamd.conf /etc/clamav/
+COPY clamdscan.pl /usr/local/owasp-modsecurity-crs/util/av-scanning/
+#COPY entrypoint.sh /
 
 RUN apk add --no-cache \
     curl-dev \
@@ -96,9 +104,16 @@ RUN apk add --no-cache \
     libxml2-dev \
     lmdb-dev \
     tzdata \
-    yajl && \
+    yajl \
+    clamav-clamdscan \
+    perl && \
     chown -R nginx:nginx /usr/share/nginx
+
+#     clamav \
+#     clamav-libunrar && \
 
 WORKDIR /usr/share/nginx/html
 
 EXPOSE 80 443
+
+#ENTRYPOINT [ "/entrypoint.sh" ]
