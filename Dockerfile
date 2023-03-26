@@ -1,10 +1,10 @@
-ARG NGINX_VER=1.21.1
+ARG NGINX_VER=1.23.3
 
 FROM nginx:${NGINX_VER}-alpine as build_modsecurity
 
-ARG GEO_DB_RELEASE=2021-08
-ARG MODSEC_BRANCH=v3.0.4
-ARG OWASP_BRANCH=v3.3/master
+ARG GEO_DB_RELEASE=2023-03
+ARG MODSEC_TAG=v3.0.8
+ARG OWASP_TAG=v3.3.4
 
 ARG CLAMD_SERVER=127.0.0.1
 ARG CLAMD_PORT=3310
@@ -41,7 +41,7 @@ RUN echo "Installing Dependencies" && \
 
 # Clone and compile modsecurity. Binary will be located in /usr/local/modsecurity
 RUN echo "Installing ModSec Library" && \
-    git clone -b ${MODSEC_BRANCH} --depth 1 https://github.com/SpiderLabs/ModSecurity && \
+    git clone -b ${MODSEC_TAG} --depth 1 https://github.com/SpiderLabs/ModSecurity && \
     git -C /opt/ModSecurity submodule update --init --recursive && \
     (cd "/opt/ModSecurity" && \
         ./build.sh && \
@@ -57,7 +57,7 @@ RUN echo "Installing ModSec Library" && \
 RUN echo 'Cloning Modsec Nginx Connector, GeoIP, ModSec OWASP Rules, and download/extract nginx and GeoIP databases' && \
     git clone -b master --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git && \
     git clone -b master --depth 1 https://github.com/leev/ngx_http_geoip2_module.git && \
-    git clone -b ${OWASP_BRANCH} --depth 1 https://github.com/coreruleset/coreruleset.git /usr/local/owasp-modsecurity-crs && \
+    git clone -b ${OWASP_TAG} --depth 1 https://github.com/coreruleset/coreruleset.git /usr/local/owasp-modsecurity-crs && \
     wget -O - https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz | tar -xz && \
     mkdir -p /etc/nginx/geoip && \
     wget -O - https://download.db-ip.com/free/dbip-city-lite-${GEO_DB_RELEASE}.mmdb.gz | gzip -d > /etc/nginx/geoip/dbip-city-lite.mmdb && \
